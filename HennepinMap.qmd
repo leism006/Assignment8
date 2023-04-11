@@ -1,0 +1,46 @@
+---
+title: "Hennepin County Rent Map"
+format:
+  html:
+    embed-resources: true
+editor: visual
+---
+
+
+## American Community Survey (ACS) Estimated Median Gross Rent
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+source("hennepin_map_setup.R")
+
+#use cache
+options(tigris_use_cache = TRUE)
+
+#Call the ACS API, returns a sf object
+hennepin_rent.df <- get_acs(
+  geography = "tract",
+  variables = "B25031_001", #Code for median gross rent
+  state     = "MN",
+  county    = "Hennepin",
+  year      = 2020,
+  geometry  = TRUE,
+  cb        = FALSE
+)
+
+#Plot normally
+rent.gg <- ggplot() + 
+  geom_sf(data = hennepin_rent.df, 
+          aes(fill = estimate, 
+              text = scales::dollar(estimate))) + 
+  labs(title = "Hennepin 2020 ACS Estimated Median Gross Rent") + 
+  theme_void() + 
+  scale_fill_viridis_c("Median Gross Rent", labels = scales::dollar)
+
+#Plotly
+ggplotly(rent.gg, tooltip = "text") %>%
+  style(hoveron = "fills")
+```
+
